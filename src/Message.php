@@ -186,9 +186,6 @@ class Message {
 
         $this->setSequenceId($uid, $msglist);
 
-        if ($this->fetch_options == IMAP::FT_PEEK) {
-            $this->parseFlags();
-        }
 
         $this->parseHeader();
 
@@ -196,9 +193,6 @@ class Message {
             $this->parseBody();
         }
         if ($this->getFetchFlagsOption() !== true) {
-            return;
-        }
-        if ($this->fetch_options === IMAP::FT_PEEK) {
             return;
         }
         $this->parseFlags();
@@ -243,7 +237,6 @@ class Message {
         $instance->parseRawHeader($raw_header);
         $instance->parseRawFlags($raw_flags);
         $instance->parseRawBody($raw_body);
-        $instance->peek();
 
         return $instance;
     }
@@ -466,6 +459,8 @@ class Message {
 
     /**
      * Handle auto "Seen" flag handling
+     *
+     * @deprecated The IMAP protocol now uses the ".PEEK" syntax.
      *
      * @throws Exceptions\ConnectionFailedException
      * @throws Exceptions\EventNotFoundException

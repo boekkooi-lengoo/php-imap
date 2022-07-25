@@ -81,7 +81,9 @@ class Query {
         $this->setClient($client);
 
         $this->sequence = ClientManager::get('options.sequence', IMAP::ST_MSGN);
-        if (ClientManager::get('options.fetch') === IMAP::FT_PEEK) $this->leaveUnread();
+        if (ClientManager::get('options.fetch') === IMAP::FT_PEEK) {
+            $this->leaveUnread();
+        }
 
         if (ClientManager::get('options.fetch_order') === 'desc') {
             $this->fetch_order = 'desc';
