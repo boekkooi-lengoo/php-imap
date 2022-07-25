@@ -105,16 +105,18 @@ interface ProtocolInterface {
     public function examineFolder(string $folder = 'INBOX');
 
     /**
-     * Fetch message headers
+     * Fetch message TEXT
+     *
      * @param array|int $uids
      * @param string $rfc
      * @param int|string $uid set to IMAP::ST_UID or any string representing the UID - set to IMAP::ST_MSGN to use
      * message numbers instead.
+     * @param bool $peek Indicates if we should only peek at the message
      *
      * @return array
      * @throws RuntimeException
      */
-    public function content($uids, string $rfc = "RFC822", $uid = IMAP::ST_UID): array;
+    public function content($uids, string $rfc = "RFC822", $uid = IMAP::ST_UID, bool $peek = false): array;
 
     /**
      * Fetch message headers

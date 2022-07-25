@@ -215,11 +215,16 @@ class LegacyProtocol extends Protocol {
      *
      * @return array
      */
-    public function content($uids, string $rfc = "RFC822", $uid = IMAP::ST_UID): array {
+    public function content($uids, string $rfc = "RFC822", $uid = IMAP::ST_UID, bool $peek = false): array {
+        $flag = $uid ? IMAP::ST_UID : IMAP::NIL;
+        if ($peek) {
+            $flag = $flag | IMAP::FT_PEEK;
+        }
+
         $result = [];
         $uids = is_array($uids) ? $uids : [$uids];
         foreach ($uids as $id) {
-            $result[$id] = \imap_fetchbody($this->stream, $id, "", $uid ? IMAP::ST_UID : IMAP::NIL);
+            $result[$id] = \imap_fetchbody($this->stream, $id, "", $flag);
         }
         return $result;
     }

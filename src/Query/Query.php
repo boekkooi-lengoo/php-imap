@@ -217,7 +217,7 @@ class Query {
 
         $contents = [];
         if ($this->getFetchBody()) {
-            $contents = $this->client->getConnection()->content($uids, "RFC822", $this->sequence);
+            $contents = $this->client->getConnection()->content($uids, "RFC822", $this->sequence, $this->fetch_options === IMAP::FT_PEEK);
         }
 
         return [

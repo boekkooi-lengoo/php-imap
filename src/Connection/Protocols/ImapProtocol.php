@@ -643,7 +643,7 @@ class ImapProtocol extends Protocol {
     }
 
     /**
-     * Fetch message headers
+     * Fetch message TEXT
      * @param array|int $uids
      * @param string $rfc
      * @param int|string $uid set to IMAP::ST_UID or any string representing the UID - set to IMAP::ST_MSGN to use
@@ -652,8 +652,13 @@ class ImapProtocol extends Protocol {
      * @return array
      * @throws RuntimeException
      */
-    public function content($uids, string $rfc = "RFC822", $uid = IMAP::ST_UID): array {
-        return $this->fetch(["$rfc.TEXT"], $uids, null, $uid);
+    public function content($uids, string $rfc = "RFC822", $uid = IMAP::ST_UID, bool $peek = false): array {
+        $item = sprintf(
+            "%s.TEXT%s",
+            $rfc,
+            $peek ? ".PEEK" : ""
+        );
+        return $this->fetch([$item], $uids, null, $uid);
     }
 
     /**
