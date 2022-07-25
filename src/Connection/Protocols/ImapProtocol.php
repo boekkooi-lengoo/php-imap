@@ -561,6 +561,11 @@ class ImapProtocol extends Protocol {
         $items = (array)$items;
         $itemList = $this->escapeList($items);
 
+        $responseItem = $items[0];
+        if (str_starts_with($responseItem, 'BODY.PEEK')) {
+            $responseItem = "BODY".mb_substr($responseItem, 9);
+        }
+
         $this->sendRequest($this->buildUIDCommand("FETCH", $uid), [$set, $itemList], $tag);
         $result = [];
         $tokens = null; // define $tokens variable before first use
@@ -591,9 +596,9 @@ class ImapProtocol extends Protocol {
 
             // if we only want one item we return that one directly
             if (count($items) == 1) {
-                if ($tokens[2][0] == $items[0]) {
+                if ($tokens[2][0] == $responseItem) {
                     $data = $tokens[2][1];
-                } elseif ($uid && $tokens[2][2] == $items[0]) {
+                } elseif ($uid && $tokens[2][2] == $responseItem) {
                     $data = $tokens[2][3];
                 } else {
                     $expectedResponse = false;
@@ -601,7 +606,7 @@ class ImapProtocol extends Protocol {
                     $count = is_countable($tokens[2]) ? count($tokens[2]) : 0;
                     // we start with 2, because 0 was already checked
                     for ($i = 2; $i < $count; $i += 2) {
-                        if ($tokens[2][$i] != $items[0]) {
+                        if ($tokens[2][$i] != $responseItem) {
                             continue;
                         }
                         $data = $tokens[2][$i + 1];
@@ -623,9 +628,9 @@ class ImapProtocol extends Protocol {
             // if we want only one message we can ignore everything else and just return
             if ($to === null && !is_array($from) && ($uid ? $tokens[2][$uidKey] == $from : $tokens[0] == $from)) {
                 // we still need to read all lines
-                while (!$this->readLine($tokens, $tag))
-
+                while (!$this->readLine($tokens, $tag)) {
                     return $data;
+                }
             }
             if ($uid) {
                 $result[$tokens[2][$uidKey]] = $data;
@@ -645,7 +650,7 @@ class ImapProtocol extends Protocol {
     /**
      * Fetch message TEXT
      * @param array|int $uids
-     * @param string $rfc
+     * @param string $rfc THIS IS NOT USED!
      * @param int|string $uid set to IMAP::ST_UID or any string representing the UID - set to IMAP::ST_MSGN to use
      * message numbers instead.
      *
@@ -653,11 +658,7 @@ class ImapProtocol extends Protocol {
      * @throws RuntimeException
      */
     public function content($uids, string $rfc = "RFC822", $uid = IMAP::ST_UID, bool $peek = false): array {
-        $item = sprintf(
-            "%s.TEXT%s",
-            $rfc,
-            $peek ? ".PEEK" : ""
-        );
+        $item = sprintf('BODY%s[TEXT]', $peek ? ".PEEK" : "");
         return $this->fetch([$item], $uids, null, $uid);
     }
 
